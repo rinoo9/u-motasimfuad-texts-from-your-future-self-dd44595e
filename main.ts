@@ -10,12 +10,34 @@ const LINE =
 
 // The gate: /output/entry.txt must be UTF-8 text of 1 to 200 characters, not
 // only whitespace. Fail loudly instead of writing an entry that cannot win.
-if (LINE.length < 1 || LINE.length > 200) {
-  throw new Error(`entry must be 1-200 characters, got ${LINE.length}`);
-}
-if (LINE.trim().length === 0) {
-  throw new Error("entry must not be only whitespace");
+const MIN_LENGTH = 1;
+const MAX_LENGTH = 200;
+const OUTPUT_PATH = "/output/entry.txt";
+
+// Check a candidate line against the gate. Throws with a precise message so
+// a bad line is caught here, never silently written to the entry file.
+function validateLine(line: string): void {
+  if (line.length < MIN_LENGTH || line.length > MAX_LENGTH) {
+    throw new Error(
+      `entry must be ${MIN_LENGTH}-${MAX_LENGTH} characters, got ${line.length}`,
+    );
+  }
+  if (line.trim().length === 0) {
+    throw new Error("entry must not be only whitespace");
+  }
 }
 
-mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", LINE, "utf8");
+// Write a validated line to the entry file, creating the output directory
+// first. The written bytes are exactly the line passed in — no trimming,
+// no trailing newline added.
+function writeEntry(line: string): void {
+  validateLine(line);
+  mkdirSync("/output", { recursive: true });
+  writeFileSync(OUTPUT_PATH, line, "utf8");
+}
+
+function main(): void {
+  writeEntry(LINE);
+}
+
+main();
