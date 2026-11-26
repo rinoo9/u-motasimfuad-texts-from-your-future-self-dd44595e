@@ -36,7 +36,22 @@ function writeEntry(line: string): void {
   writeFileSync(OUTPUT_PATH, line, "utf8");
 }
 
+// Count the words in a candidate line. Words are maximal runs of
+// non-whitespace characters; the count is only ever used for the log line
+// below, never to change what gets written to the entry file.
+function wordCount(line: string): number {
+  const words = line.trim().split(/\s+/).filter((w) => w.length > 0);
+  return words.length;
+}
+
+// One-line human-readable summary of the entry: characters and words.
+// Pure function, no I/O, so the entry file stays byte-identical.
+function entrySummary(line: string): string {
+  return `${line.length} chars, ${wordCount(line)} words`;
+}
+
 function main(): void {
+  console.error(`entry: ${entrySummary(LINE)}`);
   writeEntry(LINE);
 }
 
